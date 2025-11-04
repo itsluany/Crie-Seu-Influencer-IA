@@ -3,7 +3,7 @@
 Mini game interativo desenvolvido no **Lab Natty or Not - DIO**, onde o jogador escolhe traços e a IA gera um **avatar estilizado e uma bio automática**.
 
 🎮 **Jogue agora:**  
-👉 [Clique aqui para jogar no GitHub Pages](https://seuusuario.github.io/crie-seu-influencer-ia/)
+👉 [Clique aqui para jogar no GitHub Pages](https://itsluany.github.io/Crie-Seu-Influencer-IA/)
 
 ---
 
