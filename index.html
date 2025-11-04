@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Crie Seu Influencer IA — Mini Game</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--muted:#94a3b8;--accent:#7c3aed}
+    *{box-sizing:border-box;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
+    body{margin:0;background:linear-gradient(180deg,#041024 0%,#071428 100%);color:#e6eef8;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
+    .wrapper{width:100%;max-width:980px}
+    header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+    h1{font-size:20px;margin:0}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));border-radius:12px;padding:18px;display:grid;grid-template-columns:360px 1fr;gap:18px;box-shadow:0 6px 30px rgba(2,6,23,0.6)}
+    .panel{background:rgba(255,255,255,0.02);padding:12px;border-radius:10px}
+    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+    select,input[type=range],input[type=text]{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    .traits{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .controls{display:flex;flex-direction:column;gap:10px}
+    .actions{display:flex;gap:8px;margin-top:6px}
+    button{background:var(--accent);border:none;padding:10px 12px;border-radius:10px;color:white;cursor:pointer}
+    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06)}
+    .preview{display:flex;flex-direction:column;align-items:center;gap:10px}
+    canvas{background:linear-gradient(180deg,#0b1220,#071428);border-radius:12px;border:1px solid rgba(255,255,255,0.04)}
+    .bio{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;width:100%;min-height:86px;color:var(--muted);font-size:14px}
+    .meta{display:flex;gap:8px;align-items:center}
+    footer{margin-top:12px;color:var(--muted);font-size:13px}
+    .seed{font-size:12px;color:var(--muted)}
+    @media(max-width:880px){.card{grid-template-columns:1fr;max-width:720px}.preview canvas{width:260px;height:260px}}
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <header>
+      <div>
+        <h1>Crie Seu Influencer IA</h1>
+        <p class="lead">Escolha traços. A "IA" local gera um avatar estilizado e uma bio automática — pronto pra portfolio.</p>
+      </div>
+    </header>
+
+    <main class="card" role="main">
+      <section class="panel">
+        <div class="controls">
+          <div class="traits">
+            <div>
+              <label for="gender">Gênero</label>
+              <select id="gender">
+                <option value="nonbinary">Não-binário</option>
+                <option value="female">Feminino</option>
+                <option value="male">Masculino</option>
+              </select>
+            </div>
+            <div>
+              <label for="age">Faixa etária</label>
+              <select id="age">
+                <option value="teen">Jovem (18-24)</option>
+                <option value="adult">Adulto (25-35)</option>
+                <option value="pro">Profissional (36-50)</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="style">Estilo</label>
+              <select id="style">
+                <option value="street">Street</option>
+                <option value="elegant">Elegante</option>
+                <option value="cyber">Cyberpunk</option>
+                <option value="cozy">Cozy / Minimal</option>
+                <option value="sport">Esportivo</option>
+              </select>
+            </div>
+            <div>
+              <label for="mood">Humor</label>
+              <select id="mood">
+                <option value="funny">Divertido</option>
+                <option value="serious">Sério</option>
+                <option value="inspirational">Inspirador</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label for="hair">Cor do cabelo</label>
+            <select id="hair">
+              <option value="black">Preto</option>
+              <option value="brown">Castanho</option>
+              <option value="blonde">Loiro</option>
+              <option value="pink">Roxo/Rosa</option>
+              <option value="blue">Azul</option>
+            </select>
+          </div>
+
+          <div class="traits">
+            <div>
+              <label for="accessory">Acessório</label>
+              <select id="accessory">
+                <option value="none">Nenhum</option>
+                <option value="glasses">Óculos</option>
+                <option value="hat">Boné/Chapéu</option>
+                <option value="earring">Brinco</option>
+              </select>
+            </div>
+            <div>
+              <label for="seed">Semente (seed) — para repetir</label>
+              <input id="seed" type="text" placeholder="deixe vazio para aleatório" />
+            </div>
+          </div>
+
+          <div class="actions">
+            <button id="generate">Gerar Avatar & Bio</button>
+            <button id="randomize" class="ghost">Aleatorizar</button>
+            <button id="download" class="ghost">Baixar PNG</button>
+          </div>
+
+          <div class="meta">
+            <div class="seed">Semente atual: <span id="currentSeed">-</span></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel preview">
+        <canvas id="avatarCanvas" width="320" height="320" aria-label="Avatar gerado"></canvas>
+        <div style="width:100%">
+          <div class="bio" id="bioArea">Clique em "Gerar Avatar & Bio" para criar o influencer!</div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button id="copyBio" class="ghost">Copiar Bio</button>
+            <button id="surprise" class="ghost">Surpresa</button>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      Dica: use a semente para recriar um avatar igual. Pode subir esse HTML no GitHub Pages ou abrir direto no navegador.
+    </footer>
+  </div>
+
+  <script>
+    // util: seedable random (mulberry32)
+    function mulberry32(a) {
+      return function() {
+        var t = a += 0x6D2B79F5;
+        t = Math.imul(t ^ t >>> 15, t | 1);
+        t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      }
+    }
+
+    function hashStringToSeed(s){
+      if(!s) return Math.floor(Math.random()*1e9);
+      let h=2166136261;
+      for(let i=0;i<s.length;i++){
+        h ^= s.charCodeAt(i);
+        h += (h<<1) + (h<<4) + (h<<7) + (h<<8) + (h<<24);
+      }
+      return h >>> 0;
+    }
+
+    const canvas = document.getElementById('avatarCanvas');
+    const ctx = canvas.getContext('2d');
+    const generateBtn = document.getElementById('generate');
+    const randomBtn = document.getElementById('randomize');
+    const downloadBtn = document.getElementById('download');
+    const copyBioBtn = document.getElementById('copyBio');
+    const surpriseBtn = document.getElementById('surprise');
+    const bioArea = document.getElementById('bioArea');
+    const currentSeedEl = document.getElementById('currentSeed');
+
+    function pick(rand, arr){ return arr[Math.floor(rand()*arr.length)]; }
+
+    function drawAvatar(state){
+      // clear
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+
+      // background gradient
+      const g = ctx.createLinearGradient(0,0,0,canvas.height);
+      g.addColorStop(0, state.bg1);
+      g.addColorStop(1, state.bg2);
+      ctx.fillStyle = g;
+      roundRect(ctx,0,0,canvas.width,canvas.height,16,true,false);
+
+      // face circle
+      const cx = 160, cy = 140, r = 72;
+      ctx.beginPath();
+      ctx.fillStyle = state.skin;
+      ctx.arc(cx, cy, r, 0, Math.PI*2);
+      ctx.fill();
+
+      // hair
+      ctx.fillStyle = state.hairColor;
+      ctx.beginPath();
+      if(state.hairStyle === 'short'){
+        ctx.ellipse(cx, cy-50, 88, 56, 0, Math.PI, 0, true);
+        ctx.fill();
+      } else if(state.hairStyle === 'long'){
+        ctx.ellipse(cx, cy-40, 92, 86, 0, Math.PI, 0, true);
+        ctx.fill();
+        // sides
+        roundRect(ctx, cx-90, cy-10, 40, 90, 20, true, false);
+        roundRect(ctx, cx+50, cy-10, 40, 90, 20, true, false);
+      } else { // edgy
+        ctx.beginPath();
+        ctx.moveTo(cx-90, cy-20);
+        ctx.lineTo(cx, cy-80);
+        ctx.lineTo(cx+90, cy-20);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // eyes
+      ctx.fillStyle = '#111827';
+      ctx.beginPath(); ctx.ellipse(cx-28, cy-10, 10, 8, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx+28, cy-10, 10, 8, 0, 0, Math.PI*2); ctx.fill();
+      // eye shine
+      ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.fillRect(cx-22, cy-14,4,4); ctx.fillRect(cx+34, cy-14,4,4);
+
+      // mouth
+      ctx.beginPath(); ctx.strokeStyle='#6b7280'; ctx.lineWidth=3; ctx.moveTo(cx-20, cy+30); ctx.quadraticCurveTo(cx, cy+40, cx+20, cy+30); ctx.stroke();
+
+      // accessory
+      if(state.accessory === 'glasses'){
+        ctx.strokeStyle='rgba(0,0,0,0.85)'; ctx.lineWidth=4;
+        ctx.strokeRect(cx-46, cy-18, 36, 24); ctx.strokeRect(cx+10, cy-18, 36, 24);
+        ctx.beginPath(); ctx.moveTo(cx-10, cy-6); ctx.lineTo(cx+10, cy-6); ctx.stroke();
+      } else if(state.accessory==='hat'){
+        ctx.fillStyle=state.hatColor; roundRect(ctx, cx-110, cy-90, 220, 44, 18, true, false);
+      } else if(state.accessory==='earring'){
+        ctx.fillStyle='#ffd166'; ctx.beginPath(); ctx.arc(cx+52, cy+6,6,0,Math.PI*2); ctx.fill();
+      }
+
+      // clothes
+      ctx.fillStyle = state.cloth;
+      roundRect(ctx, 80, 210, 160, 80, 20, true, false);
+
+      // label / name badge
+      ctx.fillStyle = 'rgba(255,255,255,0.06)'; roundRect(ctx, 20, 270, 280, 36, 12, true, false);
+      ctx.fillStyle = '#e6eef8'; ctx.font='700 16px Inter, sans-serif'; ctx.fillText(state.name, 34, 295);
+
+    }
+
+    function roundRect(ctx, x, y, w, h, r, fill, stroke){
+      if (typeof r === 'undefined') r = 5;
+      if (typeof r === 'number') r = {tl: r, tr: r, br: r, bl: r};
+      ctx.beginPath();
+      ctx.moveTo(x + r.tl, y);
+      ctx.lineTo(x + w - r.tr, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r.tr);
+      ctx.lineTo(x + w, y + h - r.br);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r.br, y + h);
+      ctx.lineTo(x + r.bl, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r.bl);
+      ctx.lineTo(x, y + r.tl);
+      ctx.quadraticCurveTo(x, y, x + r.tl, y);
+      ctx.closePath();
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+
+    function generateBio(state, rand){
+      // templates
+      const namePrefixes = ['Luna','Kai','Sam','Alex','Rafa','Bia','Nico','Maya','Theo','Ivy','Leo','Zoe'];
+      const hobbies = ['fotografia','viagens','fitness','culinária','tech','games','moda','arte digital','música','design'];
+      const hooks = ['Compartilhando dicas', 'Mostrando meu processo', 'Explorando tendências', 'Criando conteúdo autêntico', 'Viajando e inspirando'];
+      const callToAction = ['Siga pra mais!', 'Vem conferir meu último conteúdo', 'Me manda DM pra collab', 'Vamos construir juntos'];
+
+      const name = state.name;
+      const ageText = (state.age==='teen')? 'jovem criador(a)' : (state.age==='adult')? 'criador(a) de conteúdo' : 'profissional experiente';
+      const styleText = ({street:'do street style', elegant:'com um toque elegante', cyber:'com vibe cyberpunk', cozy:'minimal e cozy', sport:'focado em vida ativa'})[state.style];
+      const hobby = pick(rand, hobbies);
+      const hook = pick(rand, hooks);
+      const cta = pick(rand, callToAction);
+
+      const lines = [];
+      lines.push(`${name} — ${ageText}`);
+      lines.push(`${hook} ${styleText} e conteúdo sobre ${hobby}.`);
+
+      if(state.mood==='funny') lines.push('Piadas, trends e bastidores com humor.');
+      if(state.mood==='serious') lines.push('Conteúdo pensado, direto e sem enrolação.');
+      if(state.mood==='inspirational') lines.push('Compartilhando processos pra inspirar outras pessoas.');
+
+      lines.push(cta + ' ✨');
+      return lines.join('\n');
+    }
+
+    function buildStateFromForm(rand){
+      const gender = document.getElementById('gender').value;
+      const age = document.getElementById('age').value;
+      const style = document.getElementById('style').value;
+      const mood = document.getElementById('mood').value;
+      const hair = document.getElementById('hair').value;
+      const accessory = document.getElementById('accessory').value;
+
+      // map to visuals
+      const hairColorMap = {black:'#111827',brown:'#6b4c3b',blonde:'#f7d07a',pink:'#b95ef4',blue:'#4cc9f0'};
+      const skinTones = ['#f2d6c9','#e7c6a3','#d9b08a','#c9997a','#b58365'];
+
+      const bgPalettes = {
+        street:['#0b1220','#091027'],
+        elegant:['#0f1724','#09203f'],
+        cyber:['#0b0f1a','#001233'],
+        cozy:['#0b1a14','#072012'],
+        sport:['#062024','#012121']
+      };
+
+      const clothMap = {street:'#2b2f6a',elegant:'#3b3b3b',cyber:'#0ea5a4',cozy:'#6b7280',sport:'#ef4444'};
+
+      // name generation influenced by gender and seed
+      const prefix = pick(rand, ['Neo','Nova','Aur','Vex','Sol','Mar','Rio','Sky','Kai','Lia']);
+      const suffix = pick(rand, ['X','ly','an','e','o','ah','er','en']);
+      const name = prefix + suffix;
+
+      return {
+        gender, age, style, mood, hair, accessory,
+        hairColor: hairColorMap[hair] || '#111827',
+        skin: pick(rand, skinTones),
+        bg1: bgPalettes[style][0],
+        bg2: bgPalettes[style][1],
+        cloth: clothMap[style],
+        hatColor: pick(rand, ['#111827','#1f2937','#7c3aed','#ef4444']),
+        hairStyle: pick(rand, ['short','long','edgy']),
+        name: name
+      };
+    }
+
+    function runGeneration(seedStr){
+      const seed = hashStringToSeed(seedStr);
+      currentSeedEl.textContent = seed;
+      const rand = mulberry32(seed);
+      const state = buildStateFromForm(rand);
+      const bio = generateBio(state, rand);
+      drawAvatar(state);
+      bioArea.textContent = bio;
+      return {seed, state, bio};
+    }
+
+    generateBtn.addEventListener('click', ()=>{
+      const s = document.getElementById('seed').value.trim() || String(Math.floor(Math.random()*1e9));
+      runGeneration(s);
+    });
+
+    randomBtn.addEventListener('click', ()=>{
+      // randomize form values then generate
+      const allSelects = ['gender','age','style','mood','hair','accessory'];
+      allSelects.forEach(id=>{
+        const el = document.getElementById(id);
+        const opts = Array.from(el.options).map(o=>o.value);
+        el.value = pick(Math.random, opts);
+      });
+      document.getElementById('seed').value = '';
+      const s = String(Math.floor(Math.random()*1e9));
+      runGeneration(s);
+    });
+
+    downloadBtn.addEventListener('click', ()=>{
+      const url = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = url; a.download = 'influencer.png';
+      a.click();
+    });
+
+    copyBioBtn.addEventListener('click', ()=>{
+      const text = bioArea.textContent || '';
+      navigator.clipboard.writeText(text).then(()=>{
+        copyBioBtn.textContent = 'Copiado!';
+        setTimeout(()=> copyBioBtn.textContent = 'Copiar Bio', 1400);
+      });
+    });
+
+    surpriseBtn.addEventListener('click', ()=>{
+      // small tweak: change mood randomly and regenerate with same seed
+      const moods=['funny','serious','inspirational'];
+      document.getElementById('mood').value = pick(Math.random,moods);
+      const s = document.getElementById('seed').value.trim() || String(Math.floor(Math.random()*1e9));
+      runGeneration(s);
+    });
+
+    // initial
+    runGeneration('init-'+Date.now());
+
+  </script>
+</body>
+</html>
