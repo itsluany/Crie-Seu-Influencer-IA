@@ -41,4 +41,4 @@ Mesmo sem IA real de backend, o jogo simula o comportamento de um gerador inteli
 
 ---
 
-Feito com por Luany Ferreira para o desafio **#LabDIONattyOrNot**.
+Feito por Luany Ferreira para o desafio **#LabDIONattyOrNot**.
